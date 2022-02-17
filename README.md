@@ -5,7 +5,7 @@
 
 # Screenshot
 ![screen](.animations/screen.png)
-![video](https://asciinema.org/a/469682?autoplay=1)
+[![video](https://asciinema.org/a/469682.svg)](https://asciinema.org/a/469682)
 
 # Usage
 ```bash
