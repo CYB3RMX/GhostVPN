@@ -4,19 +4,29 @@ import os
 import sys
 import requests
 import npyscreen
+import configparser
+from rich import print
 from subprocess import Popen, PIPE
 
 # Checking permissions
 if int(os.getuid()) != 0:
-    print("[!] You need root permissions to use this tool.")
+    print("[bold white on red]You need root permissions to use this tool!!")
+    sys.exit(1)
+
+# Checking CyberGhostVPN existence
+if os.path.exists("/usr/bin/cyberghostvpn") is False:
+    print("[bold white on red]CyberGhostVPN seems not installed on this system!!")
     sys.exit(1)
 
 # Available countries
 vpn_country = {
+    "Australia": "AU", "Armenia": "AM", "Argentina": "AR",
     "Belgium": "BE", "Bulgaria": "BG", "Brazil": "BR",
     "Canada": "CA", "Switzerland": "CH", "Chile": "CL",
     "China": "CN", "Colombia": "CO", "Czechia": "CZ",
-    "Germany": "DE", "Denmark": "DK", "Estonia": "EE"
+    "Germany": "DE", "Denmark": "DK", "Estonia": "EE",
+    "Kazakhstan": "KZ", "Pakistan": "PK", "Qatar": "QA", 
+    "Ukraine": "UA", "United States": "US"
 }
 
 # Class for main form that handles connections and country selections
@@ -40,6 +50,10 @@ class MainForm(npyscreen.FormBaseNew):
         self.add(
             npyscreen.ButtonPress, name="Stop Connection",
             when_pressed_function=self.StopConnect, relx=20
+        )
+        self.add(
+            npyscreen.ButtonPress, name="Auth Information",
+            when_pressed_function=self.AuthInfo, relx=20
         )
         self.add(
             npyscreen.ButtonPress, name="Get IP Info",
@@ -102,6 +116,15 @@ class MainForm(npyscreen.FormBaseNew):
                 pass
         except:
             pass
+    def AuthInfo(self):
+        auth_conf = configparser.ConfigParser()
+        username = os.getenv("SUDO_USER")
+        auth_conf.read(f"/home/{username}/.cyberghost/config.ini")
+        npyscreen.notify_confirm(
+            f"User: {auth_conf['account']['username']}",
+            "INFO"
+        )
+    
     def GetIPInfo(self):
         try:
             npyscreen.notify_wait(
@@ -124,7 +147,7 @@ class MainApp(npyscreen.NPSAppManaged):
 
         # Our main application
         self.addForm(
-            "MAIN", MainForm, name="CyberGhostVPN TUI v0.1", lines=30, columns=90
+            "MAIN", MainForm, name="CyberGhostVPN TUI v0.2", lines=30, columns=90
         )
 
 # Execution area

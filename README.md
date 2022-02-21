@@ -16,3 +16,8 @@ sudo python3 ghostui.py
 ```bash
 sudo pip3 install -r requirements.txt
 ```
+
+## For Ubuntu based systems
+```bash
+sudo -H pip3 install -r requirements.txt
+```
