@@ -6,7 +6,7 @@ import requests
 import npyscreen
 import configparser
 from rich import print
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, check_output
 
 # Checking permissions
 if int(os.getuid()) != 0:
@@ -19,15 +19,33 @@ if os.path.exists("/usr/bin/cyberghostvpn") is False:
     sys.exit(1)
 
 # Available countries
-vpn_country = {
-    "Australia": "AU", "Armenia": "AM", "Argentina": "AR",
-    "Belgium": "BE", "Bulgaria": "BG", "Brazil": "BR",
-    "Canada": "CA", "Switzerland": "CH", "Chile": "CL",
-    "China": "CN", "Colombia": "CO", "Czechia": "CZ",
-    "Germany": "DE", "Denmark": "DK", "Estonia": "EE",
-    "Kazakhstan": "KZ", "Pakistan": "PK", "Qatar": "QA", 
-    "Ukraine": "UA", "United States": "US"
-}
+def get_country_list():
+    get_countr = ["cyberghostvpn", "--country-code"]
+    outp = check_output(get_countr, text=True)
+    # outp is something like
+    # +-----+----------------------+--------------+
+    # | No. |     Country Name     | Country Code |
+    # +-----+----------------------+--------------+
+    # |  1  |       Andorra        |      AD      |
+    # | ... |         ...          |      ...     |
+    # | 100 |     South Africa     |      ZA      |
+    # +-----+----------------------+--------------+
+    return {
+            country: code
+            for line in outp.split(os.linesep)
+            # We check that line is of the form
+            # '|  33 |        France        |      FR      |'
+            if (len(c:=line.split("|")) == 5)
+            and not (c[0] or c[-1])
+            and (num:=c[1].strip()).isnumeric()
+            and (country:=c[2].strip()).isascii()
+            and (code:=c[3].strip()).isalpha()
+            and len(code) == 2
+            and code.isupper()
+        }
+# vpn_country = {"Andorra": "AD", ..., "South Africa": "ZA"}
+vpn_country = get_country_list()
+
 
 # Class for main form that handles connections and country selections
 class MainForm(npyscreen.FormBaseNew):
