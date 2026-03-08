@@ -9,7 +9,7 @@
 
 # Usage
 ```bash
-sudo python3 ghostui.py
+python3 ghostui.py
 ```
 
 # Setup
